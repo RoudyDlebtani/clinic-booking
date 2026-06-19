@@ -42,6 +42,11 @@ export function DoctorAppointmentCard({
             “{appointment.reason}”
           </p>
         )}
+        {appointment.status === "cancelled" && appointment.cancellation_reason && (
+          <p className="mt-0.5 truncate text-sm text-negative">
+            Cancelled: “{appointment.cancellation_reason}”
+          </p>
+        )}
       </div>
       {actions && <div className="flex shrink-0 gap-2">{actions}</div>}
     </Card>

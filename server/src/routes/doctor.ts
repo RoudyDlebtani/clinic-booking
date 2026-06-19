@@ -142,6 +142,7 @@ doctorRouter.get(
         patient_name: appointments.patient_name,
         patient_email: users.email,
         reason: appointments.reason,
+        cancellation_reason: appointments.cancellation_reason,
         starts_at: appointments.starts_at,
         ends_at: appointments.ends_at,
         status: appointments.status,

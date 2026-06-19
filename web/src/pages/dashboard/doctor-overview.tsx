@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import {
   AlertTriangle,
   CalendarCheck,
+  CalendarX2,
   ClipboardList,
   Loader2,
 } from "lucide-react";
@@ -33,7 +34,17 @@ export function DoctorOverviewPage() {
   }
 
   const { profile, all, todays } = data;
+  const now = Date.now();
   const pendingCount = all.filter((a) => a.status === "pending").length;
+  const cancellations = all
+    .filter(
+      (a) =>
+        a.status === "cancelled" && new Date(a.starts_at).getTime() > now,
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime(),
+    );
   const todayActive = todays.filter(
     (a) => a.status !== "declined" && a.status !== "cancelled",
   );
@@ -112,6 +123,20 @@ export function DoctorOverviewPage() {
             <DoctorAppointmentCard key={a.id} appointment={a} />
           ))}
         </div>
+      )}
+
+      {cancellations.length > 0 && (
+        <>
+          <h2 className="mb-3 mt-8 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+            <CalendarX2 className="h-4 w-4 text-negative" />
+            Recent cancellations
+          </h2>
+          <div className="space-y-3">
+            {cancellations.map((a) => (
+              <DoctorAppointmentCard key={a.id} appointment={a} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

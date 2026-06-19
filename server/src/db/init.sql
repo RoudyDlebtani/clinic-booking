@@ -81,6 +81,8 @@ create table if not exists appointments (
   patient_id   uuid not null references users (id) on delete cascade,
   patient_name text not null,
   reason       text,
+  -- Filled in when a patient cancels, explaining why (shown to the doctor).
+  cancellation_reason text,
   -- Always stored in UTC. The API converts to/from the clinic timezone.
   starts_at    timestamptz not null,
   ends_at      timestamptz not null,
@@ -91,6 +93,9 @@ create table if not exists appointments (
   created_at   timestamptz not null default now(),
   check (starts_at < ends_at)
 );
+
+-- Cancellation reason. Existing databases predate this column.
+alter table appointments add column if not exists cancellation_reason text;
 
 -- Status set + default. Named so it can be evolved idempotently on existing DBs.
 alter table appointments alter column status set default 'pending';

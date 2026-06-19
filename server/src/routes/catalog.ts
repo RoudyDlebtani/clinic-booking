@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNotNull } from "drizzle-orm";
 import { db } from "../db/client";
 import { doctorAvailability, doctors, specialties } from "../db/schema";
 import { asyncHandler, HttpError } from "../lib/http";
@@ -56,9 +56,14 @@ catalogRouter.get(
     const specialtyId =
       typeof req.query.specialtyId === "string" ? req.query.specialtyId : null;
 
+    // Only doctors with a linked account are listed — seeded/unlinked rows hidden.
     const where = specialtyId
-      ? and(eq(doctors.is_active, true), eq(doctors.specialty_id, specialtyId))
-      : eq(doctors.is_active, true);
+      ? and(
+          isNotNull(doctors.user_id),
+          eq(doctors.is_active, true),
+          eq(doctors.specialty_id, specialtyId),
+        )
+      : and(isNotNull(doctors.user_id), eq(doctors.is_active, true));
 
     const rows = await db
       .select(doctorColumns)
@@ -78,7 +83,7 @@ catalogRouter.get(
       .select(doctorColumns)
       .from(doctors)
       .leftJoin(specialties, eq(doctors.specialty_id, specialties.id))
-      .where(eq(doctors.id, req.params.id));
+      .where(and(eq(doctors.id, req.params.id), isNotNull(doctors.user_id)));
 
     if (!row) throw new HttpError(404, "Doctor not found.");
     res.json(toDoctor(row));

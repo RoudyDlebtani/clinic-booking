@@ -34,6 +34,13 @@ export const bookSchema = z.object({
   ),
 });
 
+export const cancelSchema = z.object({
+  reason: z.preprocess(
+    (v) => (typeof v === "string" ? v.trim() : v),
+    z.string().min(1, "Please give a reason for cancelling").max(500),
+  ),
+});
+
 export const slotsQuerySchema = z.object({ date: isoDate });
 
 export const doctorProfileSchema = z.object({

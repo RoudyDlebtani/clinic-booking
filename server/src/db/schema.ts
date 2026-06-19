@@ -94,6 +94,7 @@ export const appointments = pgTable("appointments", {
     .references(() => users.id, { onDelete: "cascade" }),
   patient_name: text("patient_name").notNull(),
   reason: text("reason"),
+  cancellation_reason: text("cancellation_reason"),
   starts_at: timestamp("starts_at", { withTimezone: true }).notNull(),
   ends_at: timestamp("ends_at", { withTimezone: true }).notNull(),
   status: text("status").notNull().default("pending"),

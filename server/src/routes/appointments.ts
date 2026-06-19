@@ -6,7 +6,7 @@ import { db } from "../db/client";
 import { appointments, doctors, specialties, users } from "../db/schema";
 import { requireAuth } from "../auth";
 import { asyncHandler, HttpError } from "../lib/http";
-import { bookSchema } from "../lib/validation";
+import { bookSchema, cancelSchema } from "../lib/validation";
 import { CLINIC_TIMEZONE } from "../lib/constants";
 
 export const appointmentsRouter = Router();
@@ -43,6 +43,7 @@ appointmentsRouter.get(
         patient_id: appointments.patient_id,
         patient_name: appointments.patient_name,
         reason: appointments.reason,
+        cancellation_reason: appointments.cancellation_reason,
         starts_at: appointments.starts_at,
         ends_at: appointments.ends_at,
         status: appointments.status,
@@ -130,9 +131,14 @@ appointmentsRouter.post(
 appointmentsRouter.patch(
   "/:id/cancel",
   asyncHandler(async (req, res) => {
+    const parsed = cancelSchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new HttpError(400, parsed.error.issues[0]?.message ?? "Invalid input");
+    }
+
     const updated = await db
       .update(appointments)
-      .set({ status: "cancelled" })
+      .set({ status: "cancelled", cancellation_reason: parsed.data.reason })
       .where(
         and(
           eq(appointments.id, req.params.id),

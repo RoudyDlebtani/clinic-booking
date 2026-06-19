@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
+import { Label, Textarea } from "@/components/ui/field";
 import { DoctorAvatar } from "@/components/doctor-avatar";
 import { CLINIC_TIMEZONE } from "@/lib/constants";
 import { formatAppointmentTime } from "@/lib/time";
@@ -24,18 +25,32 @@ export function AppointmentsView({
   onChanged: () => void;
 }) {
   const [toCancel, setToCancel] = useState<AppointmentWithDoctor | null>(null);
+  const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
+  function openCancel(a: AppointmentWithDoctor) {
+    setReason("");
+    setError(null);
+    setToCancel(a);
+  }
+
+  function closeCancel() {
+    setToCancel(null);
+    setReason("");
+    setError(null);
+  }
+
   function confirmCancel() {
-    if (!toCancel) return;
+    if (!toCancel || reason.trim() === "") return;
     setError(null);
     const form = new FormData();
     form.set("appointmentId", toCancel.id);
+    form.set("reason", reason.trim());
     startTransition(async () => {
       const result = await cancelAppointment(form);
       if (result.ok) {
-        setToCancel(null);
+        closeCancel();
         onChanged();
       } else {
         setError(result.error);
@@ -49,13 +64,13 @@ export function AppointmentsView({
         title="Upcoming"
         empty="You have no upcoming appointments."
         items={upcoming}
-        onCancel={setToCancel}
+        onCancel={openCancel}
       />
       <Section title="Past & cancelled" items={past} />
 
       <Modal
         open={toCancel != null}
-        onClose={() => !pending && setToCancel(null)}
+        onClose={() => !pending && closeCancel()}
         title="Cancel appointment?"
       >
         {toCancel && (
@@ -71,16 +86,30 @@ export function AppointmentsView({
               </span>
               ?
             </p>
+            <div>
+              <Label htmlFor="cancel-reason">Reason for cancelling</Label>
+              <Textarea
+                id="cancel-reason"
+                rows={3}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Let the doctor know why you're cancelling…"
+                autoFocus
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                The doctor will see this reason.
+              </p>
+            </div>
             {error && <p className="text-sm text-negative">{error}</p>}
             <div className="flex justify-end gap-2">
-              <Button
-                variant="ghost"
-                onClick={() => setToCancel(null)}
-                disabled={pending}
-              >
+              <Button variant="ghost" onClick={closeCancel} disabled={pending}>
                 Keep it
               </Button>
-              <Button variant="danger" onClick={confirmCancel} disabled={pending}>
+              <Button
+                variant="danger"
+                onClick={confirmCancel}
+                disabled={pending || reason.trim() === ""}
+              >
                 {pending ? "Cancelling…" : "Cancel appointment"}
               </Button>
             </div>

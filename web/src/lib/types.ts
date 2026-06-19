@@ -71,6 +71,7 @@ export interface Appointment {
   patient_id: string;
   patient_name: string;
   reason: string | null;
+  cancellation_reason: string | null;
   starts_at: string; // ISO UTC
   ends_at: string; // ISO UTC
   status: AppointmentStatus;
@@ -102,6 +103,7 @@ export interface DoctorAppointment {
   patient_name: string;
   patient_email: string | null;
   reason: string | null;
+  cancellation_reason: string | null;
   starts_at: string; // ISO UTC
   ends_at: string; // ISO UTC
   status: AppointmentStatus;

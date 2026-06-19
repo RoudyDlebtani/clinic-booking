@@ -44,7 +44,10 @@ export async function cancelAppointment(
 ): Promise<ActionResult> {
   try {
     const id = String(formData.get("appointmentId"));
-    await api(`/api/appointments/${id}/cancel`, { method: "PATCH" });
+    await api(`/api/appointments/${id}/cancel`, {
+      method: "PATCH",
+      body: { reason: formData.get("reason") },
+    });
     return { ok: true };
   } catch (err) {
     return toError(err, "Could not cancel the appointment.");
