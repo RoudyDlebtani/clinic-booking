@@ -18,6 +18,8 @@ build
 
 # vercel
 .vercel
+# generated serverless bundle (built by `npm run build:api`)
+api/index.js
 
 # debug
 npm-debug.log*

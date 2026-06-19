@@ -10,6 +10,8 @@
     "dev:web": "npm run dev -w web",
     "dev:server": "npm run dev -w server",
     "build": "npm run build -w web && npm run build -w server",
+    "build:api": "esbuild server/src/vercel.ts --bundle --platform=node --format=esm --target=node20 --outfile=api/index.js --banner:js=\"import{createRequire}from'node:module';const require=createRequire(import.meta.url);\" --external:pg-native --external:cloudflare:sockets",
+    "vercel-build": "npm run build -w web && npm run build:api",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "migrate": "npm run migrate -w server",
@@ -17,6 +19,7 @@
     "setup": "npm run db:up && npm run migrate && npm run seed"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "esbuild": "^0.24.2"
   }
 }
