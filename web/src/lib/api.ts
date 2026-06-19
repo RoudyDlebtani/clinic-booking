@@ -1,4 +1,9 @@
-const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
+// In production the API lives at the same origin (Vercel serves it under /api),
+// so the base is empty. In local dev it's the separate Express server. An
+// explicit VITE_API_URL always wins.
+const BASE =
+  import.meta.env.VITE_API_URL ??
+  (import.meta.env.DEV ? "http://localhost:4000" : "");
 const TOKEN_KEY = "mb_token";
 
 export function getToken(): string | null {
