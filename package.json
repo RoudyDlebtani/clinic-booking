@@ -1,0 +1,21 @@
+{
+  "name": "clinic-booking",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "workspaces": ["web", "server"],
+  "scripts": {
+    "dev": "concurrently -n api,web -c green,cyan \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:web": "npm run dev -w web",
+    "dev:server": "npm run dev -w server",
+    "build": "npm run build -w web && npm run build -w server",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "migrate": "npm run migrate -w server",
+    "seed": "npm run seed -w server",
+    "setup": "npm run db:up && npm run migrate && npm run seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
