@@ -54,7 +54,7 @@ API catches the violation and returns a friendly 409:
 exclude using gist (
   doctor_id with =,
   tstzrange(starts_at, ends_at) with &&
-) where (status <> 'cancelled')
+) where (status not in ('cancelled', 'declined'))
 ```
 
 ### 3. Timezone handling
@@ -100,7 +100,7 @@ Then open http://localhost:5173, sign up, pick a doctor, and book a slot.
 | `npm run build` | Build the web app and type-check the server |
 | `npm run db:up` / `npm run db:down` | Start / stop the Postgres container |
 | `npm run migrate` | Apply `server/src/db/init.sql` to the database |
-| `npm run seed` | Seed demo doctors, specialties and schedules |
+| `npm run seed` | Seed the specialty catalogue (doctors register their own accounts) |
 | `npm run setup` | `db:up` + `migrate` + `seed` in one step |
 | `npm test -w web` | Run the slot-logic unit tests |
 
@@ -120,14 +120,35 @@ Then open http://localhost:5173, sign up, pick a doctor, and book a slot.
 | POST | `/api/appointments` | ✓ | Book a slot |
 | PATCH | `/api/appointments/:id/cancel` | ✓ | Cancel one of the caller's appointments |
 
-## Deployment
+## Deployment (Vercel + Neon)
 
-- **Frontend:** any static host (Netlify, Cloudflare Pages, Vercel) — serve
-  `web/dist/` with a SPA fallback to `index.html`. Set `VITE_API_URL` to the
-  deployed API URL.
-- **Backend:** any Node host (Render, Railway, Fly.io). Set `DATABASE_URL`,
-  `JWT_SECRET`, and `WEB_ORIGIN`.
-- **Database:** any managed Postgres. Run the migration against it once.
+This repo is set up to deploy as a **single Vercel project** (frontend + API on
+one domain) backed by **Neon** Postgres:
+
+- The Vite app builds to `web/dist` and is served as static files.
+- The Express API is bundled (esbuild) into one serverless function at
+  `api/index.js` and served under `/api/*` (see `vercel.json`). Because it's the
+  same origin, no CORS or `VITE_API_URL` is needed in production
+  (`web/src/lib/api.ts` falls back to same-origin).
+
+**One-time setup**
+
+1. Create a Neon project and apply the schema + seed to it:
+   ```bash
+   DATABASE_URL='<neon-direct-url>?sslmode=require' npm run migrate -w server
+   DATABASE_URL='<neon-direct-url>?sslmode=require' npm run seed -w server
+   ```
+2. In Vercel, set environment variables (Production):
+   - `DATABASE_URL` → the Neon **pooled** connection string
+     (`...-pooler...?sslmode=require`)
+   - `JWT_SECRET` → a long random string (`openssl rand -hex 32`)
+
+**Deploy** (Vercel CLI): `vercel --prod`. The build runs `npm run vercel-build`
+(`build -w web` + `build:api`), which produces the static site and the bundled
+function.
+
+> Any other static host + Node host + managed Postgres works too: serve
+> `web/dist` with a SPA fallback, run the API with `DATABASE_URL`/`JWT_SECRET`
+> (and `WEB_ORIGIN` for CORS when on a different domain), and migrate once.
 
 > This is a portfolio demo, not a real medical service.
-# clinic-booking
