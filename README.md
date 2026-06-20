@@ -88,16 +88,14 @@ npm run dev       # starts the API (:4000) and the web app (:5173) together
 Then open http://localhost:5173, sign up, pick a doctor, and book a slot.
 
 The seed creates five demo doctors (one per specialty) so a new patient has
-doctors to browse right away. You can also sign in as any of them — they all use
-the password `doctor123`:
+doctors to browse right away. You can also sign in as any of them — their login
+emails and shared password are kept in `DEMO_CREDENTIALS.local.md`, which is
+**gitignored** (never committed) so the password stays out of this public repo.
+Set the password when seeding:
 
-| Email | Doctor | Specialty |
-|---|---|---|
-| `sarah.chen@medibook.demo` | Dr. Sarah Chen | General Practice |
-| `james.okafor@medibook.demo` | Dr. James Okafor | Cardiology |
-| `maria.rossi@medibook.demo` | Dr. Maria Rossi | Dermatology |
-| `aisha.khan@medibook.demo` | Dr. Aisha Khan | Pediatrics |
-| `david.mueller@medibook.demo` | Dr. David Mueller | Orthopedics |
+```bash
+DEMO_DOCTOR_PASSWORD='<from DEMO_CREDENTIALS.local.md>' npm run seed
+```
 
 > The local Postgres is published on host port **5433** (to avoid clashing with
 > an existing Postgres on 5432). Change `docker-compose.yml` and
@@ -112,7 +110,7 @@ the password `doctor123`:
 | `npm run build` | Build the web app and type-check the server |
 | `npm run db:up` / `npm run db:down` | Start / stop the Postgres container |
 | `npm run migrate` | Apply `server/src/db/init.sql` to the database |
-| `npm run seed` | Seed specialties + demo doctor accounts (logins below) |
+| `npm run seed` | Seed specialties + demo doctor accounts (needs `DEMO_DOCTOR_PASSWORD`) |
 | `npm run setup` | `db:up` + `migrate` + `seed` in one step |
 | `npm test -w web` | Run the slot-logic unit tests |
 

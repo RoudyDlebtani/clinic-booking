@@ -35,5 +35,8 @@ yarn-error.log*
 !.env.example
 !.env.local.example
 
+# local-only notes/secrets — never committed (e.g. demo doctor credentials)
+*.local.md
+
 # typescript
 *.tsbuildinfo

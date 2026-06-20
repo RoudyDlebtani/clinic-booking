@@ -31,8 +31,12 @@ const SPECIALTIES = [
   { name: "Orthopedics", description: "Bones, joints and muscles." },
 ];
 
-/** Shared login password for every demo doctor account. */
-const DEMO_PASSWORD = "doctor123";
+/**
+ * Shared login password for every demo doctor account. Kept out of source
+ * control — pass it via the DEMO_DOCTOR_PASSWORD env var (see the gitignored
+ * DEMO_CREDENTIALS.local.md for the current value and the seed command).
+ */
+const DEMO_PASSWORD = process.env.DEMO_DOCTOR_PASSWORD;
 
 const DOCTORS = [
   {
@@ -83,6 +87,14 @@ const WORK_START = "09:00";
 const WORK_END = "17:00";
 
 async function main() {
+  if (!DEMO_PASSWORD) {
+    throw new Error(
+      "DEMO_DOCTOR_PASSWORD is not set. Run e.g. " +
+        "`DEMO_DOCTOR_PASSWORD=<password> npm run seed` " +
+        "(the value is in the gitignored DEMO_CREDENTIALS.local.md).",
+    );
+  }
+
   console.log("Seeding specialties…");
   await db
     .insert(specialties)
@@ -161,7 +173,7 @@ async function main() {
   console.log(
     `\nDone. Seeded ${SPECIALTIES.length} specialties and ${DOCTORS.length} demo doctors.`,
   );
-  console.log(`Doctor logins (password: ${DEMO_PASSWORD}):`);
+  console.log("Doctor logins (password from DEMO_DOCTOR_PASSWORD):");
   for (const d of DOCTORS) console.log(`  • ${d.email}  — ${d.name}`);
 }
 
