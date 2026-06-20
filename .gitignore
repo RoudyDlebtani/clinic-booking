@@ -18,8 +18,10 @@ build
 
 # vercel
 .vercel
-# generated serverless bundle (built by `npm run build:api`)
-api/index.js
+
+# NOTE: api/index.js is the esbuild-bundled serverless function. It is committed
+# (not ignored) so git-based Vercel deploys include the function. Rebuild it with
+# `npm run build:api` after changing server code.
 
 # debug
 npm-debug.log*
